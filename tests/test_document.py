@@ -60,7 +60,8 @@ def test_absorb_and_revise(connect):
     user.absorb(User(name="Tom"))
     assert user.name == "Tom"
 
-    class MyClass(object): pass
+    class MyClass(object):
+        pass
 
     with raises(TypeError):
         user.absorb(MyClass())
@@ -93,42 +94,46 @@ def test_smart_insert(connect):
     import time
     import random
 
-    n = 10
-    total = 400
+    n_exist = 5
+    n_total = 200
 
     # Smart Insert
     User.objects.delete()
 
-    users = set([User(user_id=random.randint(1, total)) for i in range(n)])
-    User.objects.insert(users)
-    assert int(0.5 * n) <= User.objects.count() <= n
+    user_id_list = [random.randint(1, n_total) for _ in range(n_exist)]
+    user_id_list = list(set(user_id_list))
+    user_id_list.sort()
 
-    users = [User(user_id=i) for i in range(1, 1 + total)]
+    exist_users = [User(user_id=user_id) for user_id in user_id_list]
+    User.objects.insert(exist_users)
+    assert User.objects.count() == len(user_id_list)
+
+    total_users = [User(user_id=i) for i in range(1, 1 + n_total)]
 
     st = time.clock()
-    User.smart_insert(users)
+    User.smart_insert(total_users)
     elapse1 = time.clock() - st
 
-    assert User.objects.count() == total  # after smart insert, we got 400 doc
+    assert User.objects.count() == n_total  # after smart insert, we got 400 doc
 
     # Regular Insert
     User.objects.delete()
 
-    users = set([User(user_id=random.randint(1, total)) for i in range(n)])
-    User.objects.insert(users)
-    assert int(0.5 * n) <= User.objects.count() <= n
+    exist_users = [User(user_id=user_id) for user_id in user_id_list]
+    User.objects.insert(exist_users)
+    assert User.objects.count() == len(user_id_list)
 
-    users = [User(user_id=i) for i in range(1, 1 + total)]
+    total_users = [User(user_id=i) for i in range(1, 1 + n_total)]
 
     st = time.clock()
-    for user in users:
+    for user in total_users:
         try:
             user.save()
         except:
             pass
     elapse2 = time.clock() - st
 
-    assert User.objects.count() == total  # after regular insert, we got 400 doc
+    assert User.objects.count() == n_total  # after regular insert, we got 400 doc
 
     assert elapse1 <= elapse2
 

@@ -3,7 +3,6 @@
 [run]
 omit =
     mongoengine_mate/pkg/*
-    mongoengine_mate/util.py
     mongoengine_mate/zzz_ezinstall.py
 
 [report]

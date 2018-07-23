@@ -34,12 +34,11 @@ Usage::
 
 Quick Links
 ------------------------------------------------------------------------------
-
 - .. image:: https://img.shields.io/badge/Link-Document-red.svg
-      :target: http://www.wbh-doc.com.s3.amazonaws.com/mongoengine_mate/index.html
+      :target: https://mongoengine_mate.readthedocs.io/index.html
 
 - .. image:: https://img.shields.io/badge/Link-API_Reference_and_Source_Code-red.svg
-      :target: API reference and source code <http://www.wbh-doc.com.s3.amazonaws.com/mongoengine_mate/py-modindex.html
+      :target: https://mongoengine_mate.readthedocs.io/py-modindex.html
 
 - .. image:: https://img.shields.io/badge/Link-Install-red.svg
       :target: `install`_
