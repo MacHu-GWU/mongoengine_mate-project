@@ -2,9 +2,11 @@
 # -*- coding: utf-8 -*-
 
 import pytest
-from pytest import raises, approx
+from pytest import raises
 
 import sys
+from pymongo.database import Database
+from pymongo.collection import Collection
 import mongoengine
 from mongoengine_mate import ExtendedDocument
 
@@ -31,6 +33,11 @@ class Item(ExtendedDocument):
     }
 
 
+def test_id_field_name(connect):
+    assert User.id_field_name() == "user_id"
+    assert Item.id_field_name() == "_id"
+
+
 def test_keys_values_items(connect):
     user = User(user_id=1, name="Jack")
 
@@ -49,8 +56,12 @@ def test_to_tuple_list_dict_OrderedDict_json(connect):
 
     assert user.to_tuple() == ("user_id", "name")
     assert user.to_list() == ["user_id", "name"]
-    assert user.to_dict() == {"user_id": 1, "name": "Jack"}
-    assert user.to_OrderedDict() == {"user_id": 1, "name": "Jack"}
+    assert user.to_dict(include_none=True) == {"user_id": 1, "name": "Jack"}
+    assert user.to_dict(include_none=False) == {"user_id": 1, "name": "Jack"}
+    assert user.to_OrderedDict(include_none=True) == {
+        "user_id": 1, "name": "Jack"}
+    assert user.to_OrderedDict(include_none=False) == {
+        "user_id": 1, "name": "Jack"}
 
     assert user.to_json() == '{"_id": 1, "name": "Jack"}'
 
@@ -80,6 +91,11 @@ def test_revise(connect):
 def test_collection(connect):
     assert User.collection().name == user_col_name
     assert User.col().name == user_col_name
+
+
+def test_database(connect):
+    assert isinstance(User.database(), Database)
+    assert isinstance(User.db(), Database)
 
 
 def test_query(connect):
@@ -139,6 +155,20 @@ def test_smart_insert(connect):
 
     # Single Document Insert
     User.smart_insert(User(id=1))
+
+
+def test_smart_update(connect):
+    User.objects.delete()
+    User.objects.insert(User(user_id=1, name="Alice"))
+    User.smart_update(User(user_id=1, name="Adam"))
+    assert User.by_id(1).name == "Adam"
+
+    assert User.objects.count() == 1
+    User.smart_update([
+        User(user_id=2, name="Bob"),
+        User(user_id=3, name="Cathy"),
+    ])
+    assert User.objects.count() == 3
 
 
 def test_random_sample(connect):

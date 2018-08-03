@@ -28,6 +28,15 @@ class ExtendedDocument(mongoengine.Document):
         "abstract": True,
     }
 
+    @classmethod
+    def id_field_name(cls):
+        """
+        Return the ``_id`` field name.
+
+        :return: str
+        """
+        return cls.id.name
+
     def keys(self):
         """
         Convert to field list.
@@ -58,17 +67,35 @@ class ExtendedDocument(mongoengine.Document):
         """
         return self.keys()
 
-    def to_dict(self):
+    def to_dict(self, include_none=True):
         """
         Convert to dict.
-        """
-        return dict(self.items())
 
-    def to_OrderedDict(self):
+        :param include_none: bool, if False, None value field will be removed.
+        """
+        if include_none:
+            return dict(self.items())
+        else:
+            return {
+                key: value
+                for key, value in self.items()
+                if value is not None
+            }
+
+    def to_OrderedDict(self, include_none=True):
         """
         Convert to OrderedDict.
+
+        :param include_none: bool, if False, None value field will be removed.
         """
-        return OrderedDict(self.items())
+        if include_none:
+            return OrderedDict(self.items())
+        else:
+            return OrderedDict([
+                (key, value)
+                for key, value in self.items()
+                if value is not None
+            ])
 
     def __repr__(self):
         kwargs = list()
@@ -185,6 +212,32 @@ class ExtendedDocument(mongoengine.Document):
                 cls.objects.insert(data)
             except mongoengine.NotUniqueError:
                 pass
+
+    @classmethod
+    def _smart_update(cls, obj):
+        if isinstance(obj, cls):
+            dct = obj.to_dict(include_none=False)
+            id_field_name = cls.id_field_name()
+            if id_field_name in dct:
+                dct.pop(id_field_name)
+            return cls.objects(__raw__={"_id": obj.id}) \
+                .update_one(upsert=True, **dct)
+        else:  # pragma: no cover
+            raise TypeError
+
+    @classmethod
+    def smart_update(cls, data):
+        """
+
+        :param data:
+        :param filters:
+        :return:
+        """
+        if isinstance(data, list):
+            for obj in data:
+                cls._smart_update(obj)
+        else:
+            cls._smart_update(data)
 
     @classmethod
     def by_id(cls, _id):
