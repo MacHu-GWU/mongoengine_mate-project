@@ -18,6 +18,7 @@ Release and Version History
 **Minor Improvements**
 
 - add ``ExtendedDocument.id_field_name`` classmethod to access ``_id`` field name.
+- add ``ExtendedDocument.fields_ordered`` classmethod.
 - add ``include_none`` option for ``ExtendedDocument.to_dict`` and ``ExtendedDocument.to_OrderedDict``.
 - add ``ExtendedDocument.smart_update`` method
 

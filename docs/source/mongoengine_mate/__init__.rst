@@ -10,6 +10,6 @@ sub packages and modules
 .. toctree::
    :maxdepth: 1
 
-    document <document>
     util <util>
+    document <document>
     

@@ -37,6 +37,13 @@ class ExtendedDocument(mongoengine.Document):
         """
         return cls.id.name
 
+    @classmethod
+    def fields_ordered(cls):
+        """
+        Return declared field name in order.
+        """
+        return list(cls._fields_ordered)
+
     def keys(self):
         """
         Convert to field list.

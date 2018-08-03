@@ -38,6 +38,10 @@ def test_id_field_name(connect):
     assert Item.id_field_name() == "_id"
 
 
+def test_fields_ordered(connect):
+    assert User.fields_ordered() == ["user_id", "name"]
+
+
 def test_keys_values_items(connect):
     user = User(user_id=1, name="Jack")
 
