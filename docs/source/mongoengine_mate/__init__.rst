@@ -8,8 +8,9 @@ sub packages and modules
 ------------------------
 
 .. toctree::
-   :maxdepth: 1
+    :maxdepth: 1
 
+    _version <_version>
     util <util>
     document <document>
     

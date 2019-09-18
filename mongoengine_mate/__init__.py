@@ -1,8 +1,13 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-__version__ = "0.0.3"
-__short_description__ = "A library extend mongoengine."
+"""
+Utility methods for MongoDB ORM, built on top of mongoengine.
+"""
+
+
+from ._version import __version__
+
+__short_description__ = "Utility methods for MongoDB ORM, built on top of mongoengine."
 __license__ = "MIT"
 __author__ = "Sanhe Hu"
 __author_email__ = "husanhe@gmail.com"

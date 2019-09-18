@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import sys
@@ -16,6 +15,7 @@ def connect():
     client = mongoengine.connect(
         dbname,
         host=host,
+        retryWrites=False,
     )
     db = client[dbname]
 

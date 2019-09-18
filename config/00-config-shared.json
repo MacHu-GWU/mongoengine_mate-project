@@ -1,0 +1,6 @@
+{
+    "PROJECT_NAME": "mongoengine_mate",
+    "AWS_PROFILE_FOR_DOC_DEPLOY": "sanhe",
+    "S3_BUCKET_FOR_DOC_HOST": "sanherabbit.com",
+    
+}

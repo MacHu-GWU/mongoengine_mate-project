@@ -1,0 +1,65 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""
+run ``chmod +x switch-env`` to set this script executable on Unix.
+
+Switch between different (set current environment to one of dev / test / prod).
+It just copy the corresponding json file to ``./config-raw.json``.
+
+Usage:
+
+.. code-block:: bash
+
+    ./switch-env dev
+"""
+
+from __future__ import print_function
+import os
+import sys
+import shutil
+from os.path import join, dirname, basename, abspath, getmtime
+
+
+class Style(object):
+    RED = "\033[31m"
+    GREEN = "\033[32m"
+    CYAN = "\033[36m"
+
+here = dirname(abspath(__file__))
+dst = join(here, "config-raw.json")
+
+
+def find_config_file_by_environment(environment):
+    for p_basename in os.listdir(here):
+        if p_basename.endswith("{}.json".format(environment)):
+            return join(here, p_basename)
+    raise EnvironmentError("can't find any config file matches stage `{}`".format(environment))
+
+
+if __name__ == "__main__":
+    if len(sys.argv) <= 1:
+        print(Style.RED + "You must specify environment name dev|test|prod as first arg, example:" \
+              + Style.GREEN + " ./{} dev".format(basename(__file__)))
+        exit(1)
+
+    environment = sys.argv[1]
+    print(Style.CYAN + "switch to environment '{}' ... ".format(environment))
+    try:
+        src = find_config_file_by_environment(environment)
+    except EnvironmentError:
+        print(Style.RED + "unable to find any config file for '{}'".format(environment))
+        exit(1)
+
+    print(Style.GREEN + "copy {}".format(src))
+    print(Style.GREEN + "   to {}".format(dst))
+
+    last_modify_time_before = getmtime(dst)
+    shutil.copy(src, dst)
+    last_modify_time_after = getmtime(dst)
+    if last_modify_time_before == last_modify_time_after:
+        print(Style.RED + "failed!")
+        exit(1)
+    else:
+        print(Style.GREEN + "successfully switched to '{}' environment.".format(environment))
+

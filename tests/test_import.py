@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import pytest
@@ -7,7 +6,7 @@ from pytest import raises, approx
 
 def test():
     import mongoengine_mate
-    pass
+    mongoengine_mate.ExtendedDocument
 
 
 if __name__ == "__main__":

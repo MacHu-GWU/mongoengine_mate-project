@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 """
@@ -10,10 +9,19 @@ import mongoengine
 from copy import deepcopy
 from collections import OrderedDict
 
+from . import util
+
 try:
-    from . import util
-except ImportError:  # pragma: no cover
-    from mongoengine_mate import util
+    from typing import Type, Any, List, Dict
+except ImportError: # pragma: no cover
+    pass
+
+try:
+    from pymongo.collection import Collection
+    from pymongo.database import Database
+    from mongoengine import QuerySet
+except ImportError: # pragma: no cover
+    pass
 
 
 class ExtendedDocument(mongoengine.Document):
@@ -33,7 +41,7 @@ class ExtendedDocument(mongoengine.Document):
         """
         Return the ``_id`` field name.
 
-        :return: str
+        :rtype: str
         """
         return cls.id.name
 
@@ -41,36 +49,48 @@ class ExtendedDocument(mongoengine.Document):
     def fields_ordered(cls):
         """
         Return declared field name in order.
+
+        :rtype: List[str]
         """
         return list(cls._fields_ordered)
 
     def keys(self):
         """
         Convert to field list.
+
+        :rtype: List[str]
         """
         return list(self._fields_ordered)
 
     def values(self):
         """
         Convert to field value list.
+
+        :rtype: list
         """
         return [self._data.get(attr) for attr in self._fields_ordered]
 
     def items(self):
         """
         Convert to field and value pair list.
+
+        :rtype: List[Tuple[str, Any]]
         """
         return [(attr, self._data.get(attr)) for attr in self._fields_ordered]
 
     def to_tuple(self):
         """
         Convert to field tuple.
+
+        :rtype: Tuple[str]
         """
         return self._fields_ordered
 
     def to_list(self):
         """
         Convert to field list.
+
+        :rtype: List[str]
         """
         return self.keys()
 
@@ -78,7 +98,10 @@ class ExtendedDocument(mongoengine.Document):
         """
         Convert to dict.
 
-        :param include_none: bool, if False, None value field will be removed.
+        :type include_none: bool
+        :param include_none: if False, None value field will be removed.
+
+        :rtype: Dict[str, Any]
         """
         if include_none:
             return dict(self.items())
@@ -117,6 +140,9 @@ class ExtendedDocument(mongoengine.Document):
         """
         For attributes of others that value is not None, assign it to self.
 
+        :type other: ExtendedDocument
+        :rtype: None
+
         **中文文档**
 
         将另一个文档中的数据更新到本条文档。当且仅当数据值不为None时。
@@ -131,6 +157,10 @@ class ExtendedDocument(mongoengine.Document):
     def revise(self, data):
         """
         Revise attributes value with dictionary data.
+
+        :type data: dict
+
+        :rtype: None
 
         **中文文档**
 
@@ -148,6 +178,8 @@ class ExtendedDocument(mongoengine.Document):
         """
         Get pymongo Collection instance.
 
+        :rtype: Collection
+
         **中文文档**
 
         获得pymongo.Collection的实例。
@@ -158,6 +190,8 @@ class ExtendedDocument(mongoengine.Document):
     def col(cls):
         """
         Alias of :meth:`~ExtendedDocument.collection()`
+
+        :rtype: Collection
         """
         return cls._get_collection()
 
@@ -165,6 +199,8 @@ class ExtendedDocument(mongoengine.Document):
     def database(cls):
         """
         Get connected pymongo Database instance.
+
+        :rtype: Database
         """
         return cls._get_db()
 
@@ -172,6 +208,8 @@ class ExtendedDocument(mongoengine.Document):
     def db(cls):
         """
         Alias of :meth:`~ExtendedDocument.database()`
+
+        :rtype: Database
         """
         return cls._get_db()
 
@@ -179,6 +217,9 @@ class ExtendedDocument(mongoengine.Document):
     def smart_insert(cls, data, minimal_size=5):
         """
         An optimized Insert strategy.
+
+        :type data: List[ExtendedDocument]
+        :type minimal_size: int
 
         **中文文档**
 
@@ -222,6 +263,13 @@ class ExtendedDocument(mongoengine.Document):
 
     @classmethod
     def _smart_update(cls, obj):
+        """
+        Update one document, locate the document by _id, then only update
+        the field defined with the ExtendedDocument instance. None field is
+        ignored.
+
+        :type obj: ExtendedDocument
+        """
         if isinstance(obj, cls):
             dct = obj.to_dict(include_none=False)
             id_field_name = cls.id_field_name()
@@ -235,10 +283,14 @@ class ExtendedDocument(mongoengine.Document):
     @classmethod
     def smart_update(cls, data):
         """
+        Batch update with a lots orm data model.
 
-        :param data:
-        :param filters:
-        :return:
+        .. note::
+
+            The batch update operation is not atomic. It can be done
+            with transaction in MongoDB 4.0 +
+
+        :type data: List[ExtendedDocument]
         """
         if isinstance(data, list):
             for obj in data:
@@ -249,7 +301,9 @@ class ExtendedDocument(mongoengine.Document):
     @classmethod
     def by_id(cls, _id):
         """
-        Get one instance by _id.
+        Get one document instance by _id.
+
+        :rtype: ExtendedDocument
 
         **中文文档**
 
@@ -262,6 +316,8 @@ class ExtendedDocument(mongoengine.Document):
         """
         Filter objects by pymongo dict query.
 
+        :rtype: QuerySet
+
         **中文文档**
 
         使用pymongo的API进行查询。
@@ -273,8 +329,13 @@ class ExtendedDocument(mongoengine.Document):
         """
         Randomly select n samples.
 
+        :type filters: Union[Dict, None]
         :param filters: nature pymongo query dictionary.
+
+        :type n: int
         :param n: number of document you want to select.
+
+        :rtype: List[ExtendedDocument]
 
         **中文文档**
 

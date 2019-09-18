@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import pytest
@@ -6,7 +5,6 @@ from pytest import raises
 
 import sys
 from pymongo.database import Database
-from pymongo.collection import Collection
 import mongoengine
 from mongoengine_mate import ExtendedDocument
 
@@ -33,6 +31,7 @@ class Item(ExtendedDocument):
     }
 
 
+#--- Data Model ---
 def test_id_field_name(connect):
     assert User.id_field_name() == "user_id"
     assert Item.id_field_name() == "_id"
@@ -92,6 +91,7 @@ def test_revise(connect):
         user.revise([("name", "Tome")])
 
 
+#--- CRUD ---
 def test_collection(connect):
     assert User.collection().name == user_col_name
     assert User.col().name == user_col_name

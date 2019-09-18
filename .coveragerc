@@ -1,9 +1,13 @@
 # Coverage.py is a tool for measuring code coverage of Python programs.
-# for more info: https://coverage.readthedocs.io/en/coverage-4.4.1/config.html
+# for more info: https://coverage.readthedocs.io/en/latest/config.html
 [run]
 omit =
+    mongoengine_mate/_version.py
+    mongoengine_mate/cli.py
     mongoengine_mate/pkg/*
-    mongoengine_mate/zzz_ezinstall.py
+    mongoengine_mate/docs/*
+    mongoengine_mate/tests/*
+    mongoengine_mate/handlers/*
 
 [report]
 # Regexes for lines to exclude from consideration
