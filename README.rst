@@ -75,20 +75,10 @@ First, you got better ``__repr__()`` like:
     >>> User(id=1, name="Alice")
     User(id=1, name="Alice")
 
-
-Then, you got more built-in method to do:
-
-.. code-block:: python
-
-    # smart_insert, automatically handle NotUniqueError
-    User.smart_insert([
-        User(id=1, name="Alice"),
-        User(id=2, name="Bob"),
-    ])
-
     # access its collection or database
-    col_user = User.col()
-    col_db = User.db()
+    >>> col_user = User.col()
+    >>> col_user.find({"_id": 1})
+    >>> col_db = User.db()
 
     # access its field name in order
     >>> User.fields_ordered()
@@ -98,14 +88,45 @@ Then, you got more built-in method to do:
     >>> user = User(id=1, name="Alice")
     >>> user.keys()
     ["id", "name"]
+
     >>> user.values()
     [1, "Alice"]
+
     >>> user.items()
     [("id", "name"), (1, "Alice")]
+
     >>> user.to_dict()
     {"id": 1, "name": "Alice"}
+
     >>> user.to_OrderedDict()
     OrderedDict([("id", "name"), (1, "Alice")])
+
+
+Smart Insert - Skip Primary Key Conflict
+------------------------------------------------------------------------------
+
+When you do batch insert, sometimes one or a few documents may cause ``_id`` field conflict error, which is breaking the batch insert operation.
+
+Usually you have to write a ``for loop` and use ``try ... except ...`` to ignore conflict. But, it is SLOW!
+
+``ExtendedDocument.smart_insert`` provides a fast and convenient way to batch insert lots of document at once correctly.
+
+.. code-block:: python
+
+    # insert one document which breaks the batch insert
+    User(id=100, name="Obama").save()
+
+    # smart_insert, automatically handle NotUniqueError
+    User.smart_insert([
+        User(id=1, name="Alice"),
+        User(id=2, name="Bob"),
+        ...
+        User(id=1000, name="Zillow"),
+    ])
+
+
+Smart Update - Skip Primary
+------------------------------------------------------------------------------
 
 
 More examples can be found at https://github.com/MacHu-GWU/mongoengine_mate-project/blob/master/mongoengine_mate/document.py

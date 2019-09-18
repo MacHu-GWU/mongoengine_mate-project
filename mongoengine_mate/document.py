@@ -25,7 +25,8 @@ except ImportError:  # pragma: no cover
 
 
 class ExtendedDocument(mongoengine.Document):
-    """Provide `mongoengine.Document <http://docs.mongoengine.org/apireference.html#mongoengine.Document>`_
+    """
+    Provide `mongoengine.Document <http://docs.mongoengine.org/apireference.html#mongoengine.Document>`_
     more utility methods.
 
     **中文文档**
@@ -262,13 +263,16 @@ class ExtendedDocument(mongoengine.Document):
                 pass
 
     @classmethod
-    def _smart_update(cls, obj):
+    def _smart_update(cls, obj, upsert=False):
         """
         Update one document, locate the document by _id, then only update
         the field defined with the ExtendedDocument instance. None field is
         ignored.
 
         :type obj: ExtendedDocument
+
+        :rtype: int
+        :return: 0 or 1, number of document been updated
         """
         if isinstance(obj, cls):
             dct = obj.to_dict(include_none=False)
@@ -276,12 +280,12 @@ class ExtendedDocument(mongoengine.Document):
             if id_field_name in dct:
                 dct.pop(id_field_name)
             return cls.objects(__raw__={"_id": obj.id}) \
-                .update_one(upsert=True, **dct)
+                .update_one(upsert=upsert, **dct)
         else:  # pragma: no cover
             raise TypeError
 
     @classmethod
-    def smart_update(cls, data):
+    def smart_update(cls, data, upsert=False, _insert_after_update=False):
         """
         Batch update with a lots orm data model.
 
@@ -290,13 +294,40 @@ class ExtendedDocument(mongoengine.Document):
             The batch update operation is not atomic. It can be done
             with transaction in MongoDB 4.0 +
 
-        :type data: List[ExtendedDocument]
+        :type data: Union[ExtendedDocument, List[ExtendedDocument]]
+        :param _insert_after_update: for developer use only, if True, will
+            collect all to-insert document and bulk insert it at once after
+            update.
+
+        :rtype: Tuple[int, int]
         """
+        n_update, n_insert = 0, 0
         if isinstance(data, list):
-            for obj in data:
-                cls._smart_update(obj)
+            if _insert_after_update:
+                upsert = False
+                to_insert_list = list()
+                for obj in data:
+                    update_flag = cls._smart_update(obj, upsert=upsert)
+                    if not update_flag:
+                        to_insert_list.append(obj)
+                cls.smart_insert(to_insert_list)
+                n_insert = len(to_insert_list)
+                n_update = len(data) - n_insert
+            else:
+                for obj in data:
+                    update_flag = cls._smart_update(obj, upsert=upsert)
+                    if update_flag:
+                        n_update += 1
+                    else:
+                        n_insert += 1
         else:
-            cls._smart_update(data)
+            update_flag = cls._smart_update(data, upsert=upsert)
+            if update_flag:
+                n_update += 1
+            else:
+                n_insert += 1
+
+        return n_update, n_insert
 
     @classmethod
     def by_id(cls, _id):

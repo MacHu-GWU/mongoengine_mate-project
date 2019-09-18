@@ -30,7 +30,7 @@ class Item(ExtendedDocument):
     }
 
 
-#--- CRUD ---
+# --- CRUD ---
 def test_collection(connect):
     assert User.collection().name == user_col_name
     assert User.col().name == user_col_name
@@ -98,20 +98,6 @@ def test_smart_insert(connect):
 
     # Single Document Insert
     User.smart_insert(User(id=1))
-
-
-def test_smart_update(connect):
-    User.objects.delete()
-    User.objects.insert(User(user_id=1, name="Alice"))
-    User.smart_update(User(user_id=1, name="Adam"))
-    assert User.by_id(1).name == "Adam"
-
-    assert User.objects.count() == 1
-    User.smart_update([
-        User(user_id=2, name="Bob"),
-        User(user_id=3, name="Cathy"),
-    ])
-    assert User.objects.count() == 3
 
 
 def test_random_sample(connect):
