@@ -30,7 +30,7 @@ def test_smart_insert(connect):
     # Smart Insert
     User.objects.delete()
 
-    total_user_ids = range(1, 1+n_total)
+    total_user_ids = list(range(1, 1+n_total))
     random.shuffle(total_user_ids)
     breaker_user_ids = total_user_ids[:n_breaker]
 

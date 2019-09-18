@@ -76,43 +76,33 @@ def test_smart_update_correctness(connect):
 
 
 def test_smart_update_performance(connect):
-    n = 100
+    n_total = 100
     n_breaker = 25
 
+    total_user_ids = list(range(1, 1 + n_total))
+    random.shuffle(total_user_ids)
+    breaker_user_ids = total_user_ids[:n_breaker]
+
     User.objects.delete()
-    data = [
-        User(_id=_id, name="Bob")
-        for _id in range(1, n + 1)
-    ]
+    total_users = [User(_id=_id, name="Bob") for _id in total_user_ids]
+    breaker_users = [User(_id=_id, name="Alice") for _id in breaker_user_ids]
 
-    data_breaker = [
-        User(_id=_id, name="Alice")
-        for _id in random.sample(list(range(1, n + 1)), n_breaker)
-    ]
-
-    User.smart_insert(data_breaker)
+    User.smart_insert(breaker_users)
     assert User.objects.count() == n_breaker
     with DateTimeTimer(title="just upsert"):
-        User.smart_update(data, upsert=True, _insert_after_update=False)
-    assert User.objects.count() == n
+        User.smart_update(total_users, upsert=True, _insert_after_update=False)
+    assert User.objects.count() == n_total
 
     # insert_after_update strategy
     User.objects.delete()
-    data = [
-        User(_id=_id, name="Bob")
-        for _id in range(1, n + 1)
-    ]
+    total_users = [User(_id=_id, name="Bob") for _id in total_user_ids]
+    breaker_users = [User(_id=_id, name="Alice") for _id in breaker_user_ids]
 
-    data_breaker = [
-        User(_id=_id, name="Alice")
-        for _id in random.sample(list(range(1, n + 1)), n_breaker)
-    ]
-
-    User.smart_insert(data_breaker)
+    User.smart_insert(breaker_users)
     assert User.objects.count() == n_breaker
     with DateTimeTimer(title="insert after update"):
-        User.smart_update(data, upsert=True, _insert_after_update=True)
-    assert User.objects.count() == n
+        User.smart_update(total_users, upsert=True, _insert_after_update=True)
+    assert User.objects.count() == n_total
 
 
 if __name__ == "__main__":
