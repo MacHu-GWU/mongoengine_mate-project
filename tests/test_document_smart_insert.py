@@ -25,7 +25,7 @@ def test_smart_insert(connect):
     import random
 
     n_breaker = 5
-    n_total = 100
+    n_total = 120
 
     # Smart Insert
     User.objects.delete()
