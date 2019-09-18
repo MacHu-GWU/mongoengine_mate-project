@@ -215,7 +215,7 @@ class ExtendedDocument(mongoengine.Document):
         return cls._get_db()
 
     @classmethod
-    def smart_insert(cls, data, minimal_size=5):
+    def smart_insert(cls, data, minimal_size=5, n_insert=0, n_skipped=0):
         """
         An optimized Insert strategy.
 
@@ -239,6 +239,7 @@ class ExtendedDocument(mongoengine.Document):
             # 首先进行尝试bulk insert
             try:
                 cls.objects.insert(data)
+                n_insert += len(data)
             # 失败了
             except mongoengine.NotUniqueError:
                 # 分析数据量
@@ -248,19 +249,22 @@ class ExtendedDocument(mongoengine.Document):
                     # 则进行分包
                     n_chunk = math.floor(math.sqrt(n))
                     for chunk in util.grouper_list(data, n_chunk):
-                        cls.smart_insert(chunk, minimal_size)
+                        n_insert, n_skipped = cls.smart_insert(chunk, minimal_size, n_insert, n_skipped)
                 # 否则则一条条地逐条插入
                 else:
                     for document in data:
                         try:
                             cls.objects.insert(document)
+                            n_insert +=1
                         except mongoengine.NotUniqueError:
-                            pass
+                            n_skipped +=1
         else:
             try:
                 cls.objects.insert(data)
+                n_insert += 1
             except mongoengine.NotUniqueError:
-                pass
+                n_skipped += 1
+        return n_insert, n_skipped
 
     @classmethod
     def _smart_update(cls, obj, upsert=False):

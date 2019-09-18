@@ -49,57 +49,6 @@ def test_query(connect):
     assert User.by_filter({"_id": 2})[:][0].name == "Tom"
 
 
-def test_smart_insert(connect):
-    import time
-    import random
-
-    n_exist = 5
-    n_total = 200
-
-    # Smart Insert
-    User.objects.delete()
-
-    user_id_list = [random.randint(1, n_total) for _ in range(n_exist)]
-    user_id_list = list(set(user_id_list))
-    user_id_list.sort()
-
-    exist_users = [User(user_id=user_id) for user_id in user_id_list]
-    User.objects.insert(exist_users)
-    assert User.objects.count() == len(user_id_list)
-
-    total_users = [User(user_id=i) for i in range(1, 1 + n_total)]
-
-    st = time.clock()
-    User.smart_insert(total_users)
-    elapse1 = time.clock() - st
-
-    assert User.objects.count() == n_total  # after smart insert, we got 400 doc
-
-    # Regular Insert
-    User.objects.delete()
-
-    exist_users = [User(user_id=user_id) for user_id in user_id_list]
-    User.objects.insert(exist_users)
-    assert User.objects.count() == len(user_id_list)
-
-    total_users = [User(user_id=i) for i in range(1, 1 + n_total)]
-
-    st = time.clock()
-    for user in total_users:
-        try:
-            user.save()
-        except:
-            pass
-    elapse2 = time.clock() - st
-
-    assert User.objects.count() == n_total  # after regular insert, we got 400 doc
-
-    assert elapse1 <= elapse2
-
-    # Single Document Insert
-    User.smart_insert(User(id=1))
-
-
 def test_random_sample(connect):
     User.smart_insert([User(user_id=i) for i in range(100)])
     assert len(User.random_sample(n=3)) == 3
