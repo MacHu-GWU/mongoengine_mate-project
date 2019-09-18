@@ -7,6 +7,7 @@ import mongoengine
 
 @pytest.fixture
 def connect():
+    # just a test mongodb in container
     dbname = "devtest"
     username = "admin"
     password = "&2z7#tMH6BJt"

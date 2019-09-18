@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-This module extend the power of mongoengine.Document.
+This module extend the power of ``mongoengine.Document``.
 """
 
 import math

@@ -125,11 +125,32 @@ Usually you have to write a ``for loop` and use ``try ... except ...`` to ignore
     ])
 
 
-Smart Update - Skip Primary
+Smart Update - Batch Upsert
 ------------------------------------------------------------------------------
 
+When you do batch update, you mostly want to use the ``_id`` field to locate which document you want to update.
 
-More examples can be found at https://github.com/MacHu-GWU/mongoengine_mate-project/blob/master/mongoengine_mate/document.py
+.. code-block:: python
+
+    >>>User(id=2, name="Bob").save()
+
+    # update only
+    >>> User.smart_update([
+        User(id=1, name="Alice"),
+        User(id=2, name="Bruce"),
+        User(id=3, name="Cathy"),
+    ], upsert=False)
+    >>> User.objects.count()
+    1
+
+    # upsert
+    >>> User.smart_update([
+        User(id=1, name="Alice"),
+        User(id=2, name="Bruce"),
+        User(id=3, name="Cathy"),
+    ], upsert=True)
+    >>> User.objects.count()
+    3
 
 
 .. _install:
