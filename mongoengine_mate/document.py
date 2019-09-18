@@ -13,14 +13,14 @@ from . import util
 
 try:
     from typing import Type, Any, List, Dict
-except ImportError: # pragma: no cover
+except ImportError:  # pragma: no cover
     pass
 
 try:
     from pymongo.collection import Collection
     from pymongo.database import Database
     from mongoengine import QuerySet
-except ImportError: # pragma: no cover
+except ImportError:  # pragma: no cover
     pass
 
 
@@ -218,7 +218,7 @@ class ExtendedDocument(mongoengine.Document):
         """
         An optimized Insert strategy.
 
-        :type data: List[ExtendedDocument]
+        :type data: Union[ExtendedDocument, List[ExtendedDocument]]
         :type minimal_size: int
 
         **中文文档**
