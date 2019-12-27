@@ -29,6 +29,8 @@ Release and Version History
 
 **Miscellaneous**
 
+- drop support for Python3.4 and Python3.5
+
 
 0.0.1 (2019-09-17)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
