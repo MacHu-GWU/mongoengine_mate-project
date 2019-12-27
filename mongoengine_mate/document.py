@@ -5,9 +5,10 @@ This module extend the power of ``mongoengine.Document``.
 """
 
 import math
-import mongoengine
-from copy import deepcopy
 from collections import OrderedDict
+from copy import deepcopy
+
+import mongoengine
 
 from . import util
 
@@ -22,6 +23,11 @@ try:
     from mongoengine import QuerySet
 except ImportError:  # pragma: no cover
     pass
+
+try:
+    insert_errors = (mongoengine.NotUniqueError, mongoengine.BulkWriteError)
+except:
+    insert_errors = (mongoengine.NotUniqueError,)
 
 
 class ExtendedDocument(mongoengine.Document):
@@ -142,7 +148,7 @@ class ExtendedDocument(mongoengine.Document):
         For attributes of others that value is not None, assign it to self.
 
         :type other: ExtendedDocument
-        :rtype: None
+        :rtype: dict
 
         **中文文档**
 
@@ -151,17 +157,21 @@ class ExtendedDocument(mongoengine.Document):
         if not isinstance(other, self.__class__):
             raise TypeError
 
+        overwritten_data = dict()
         for attr, value in other.items():
             if value is not None:
-                setattr(self, attr, deepcopy(value))
+                copied_value = deepcopy(value)
+                setattr(self, attr, copied_value)
+                overwritten_data[attr] = copied_value
+
+        return overwritten_data
 
     def revise(self, data):
         """
         Revise attributes value with dictionary data.
 
         :type data: dict
-
-        :rtype: None
+        :rtype: dict
 
         **中文文档**
 
@@ -170,9 +180,14 @@ class ExtendedDocument(mongoengine.Document):
         if not isinstance(data, dict):
             raise TypeError
 
+        overwritten_data = dict()
         for key, value in data.items():
             if value is not None:
-                setattr(self, key, deepcopy(value))
+                copied_value = deepcopy(value)
+                setattr(self, key, copied_value)
+                overwritten_data[key] = copied_value
+
+        return overwritten_data
 
     @classmethod
     def collection(cls):
@@ -241,7 +256,7 @@ class ExtendedDocument(mongoengine.Document):
                 cls.objects.insert(data)
                 n_insert += len(data)
             # 失败了
-            except mongoengine.NotUniqueError:
+            except insert_errors:
                 # 分析数据量
                 n = len(data)
                 # 如果数据条数多于一定数量
@@ -255,14 +270,14 @@ class ExtendedDocument(mongoengine.Document):
                     for document in data:
                         try:
                             cls.objects.insert(document)
-                            n_insert +=1
-                        except mongoengine.NotUniqueError:
-                            n_skipped +=1
+                            n_insert += 1
+                        except insert_errors:
+                            n_skipped += 1
         else:
             try:
                 cls.objects.insert(data)
                 n_insert += 1
-            except mongoengine.NotUniqueError:
+            except insert_errors:
                 n_skipped += 1
         return n_insert, n_skipped
 

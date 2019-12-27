@@ -55,10 +55,11 @@ def test_to_tuple_list_dict_OrderedDict_json(connect):
     assert user.to_json() == '{"_id": 1, "name": "Jack"}'
 
 
-def test_absorb_and_revise(connect):
+def test_absorb(connect):
     user = User(id=1, name="Jack")
-    user.absorb(User(name="Tom"))
+    overwritten_data = user.absorb(User(name="Tom"))
     assert user.name == "Tom"
+    assert overwritten_data == {"name": "Tom"}
 
     with raises(TypeError):
         user.absorb({"name": "Tom"})
@@ -73,8 +74,9 @@ def test_absorb_and_revise(connect):
 def test_revise(connect):
     user = User(id=1, name="Jack")
     user_data = {"name": "Tom"}
-    user.revise(user_data)
+    overwritten_data = user.revise(user_data)
     assert user.name == "Tom"
+    assert overwritten_data == {"name": "Tom"}
 
     with raises(TypeError):
         user.revise([("name", "Tome")])
